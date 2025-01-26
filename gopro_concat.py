@@ -16,7 +16,8 @@ Concat Steps:
 
 import inspect
 import logging
-import os
+from os import listdir, chdir
+from os.path import isfile, join
 import re
 import subprocess
 import sys
@@ -46,11 +47,11 @@ def print_intro():
 
     print(open_msg)
 
-    source_path = str(input("Source path: "))
+    source_path = "/mnt/e/JANA_Skoleni/2024_09_01/" #str(input("Source path: "))
 
-    output_path = str(input("Output path: "))
+    output_path = "/mnt/f/Video/" # str(input("Output path: "))
 
-    down_convert = str(input("Downconvert the GoPro files to 10Mbit [Yes/No]: "))
+    down_convert = "No" #str(input("Downconvert the GoPro files to 10Mbit [Yes/No]: "))
 
     while True:
         if down_convert.lower() == 'yes':
@@ -72,47 +73,40 @@ def get_gopro_list(source_path):
     File names must follow the specific pattern defined in the
     regex statement.
     '''
-    os.chdir(source_path)
 
-    gopr_source_list = []
-    gopr_key_list = []
-    gopr_dict = {}
+    all_gopro_files = []
+    all_gopro_keys = {}
 
-    file_list = sorted(os.listdir(source_path), key=os.path.getctime)
+    onlyfiles = [f for f in listdir(source_path) if isfile(join(source_path, f))]
 
     # print("FILE LIST: " + str(file_list))
 
-    for gopro_file in file_list:
-        if gopro_file.endswith('.MP4'):
-            gopr_source_list.append(gopro_file)
+    regex = r"(GH\d{6})\."
+
+    for gopro_file in onlyfiles:
+        if gopro_file.endswith('.MP4'):           
+            gp = re.search(regex, gopro_file)
+            if gp is not None:
+                all_gopro_files.append(gopro_file)
         else:
             continue
 
-    print("GoPRO SRC LIST: " + str(gopr_source_list))
+    print("GP KEY LIST: " + str(all_gopro_files))
 
-    for file in gopr_source_list:
-        print("FILE: " + file)
-        regex = r"(GOPR\d{4})\."
-        gp = re.search(regex, file)
-        # print(gp)
-        if gp is not None:
-            gopr_key_list.append(file)
-        else:
-            pass
-
-    print("GP KEY LIST: " + str(gopr_key_list))
-
-    for file in gopr_key_list:
+    for file in all_gopro_files:
         filenum = file[4:]
-        fstring = f"(GP\\d{{2}}{filenum})"
-        r = re.compile(fstring)
-        gplist = list(filter(r.match, gopr_source_list))
-        gplist.insert(0,file)
-        gopr_dict.update({file:gplist})
+        filekey = file[4:8]
+
+        if filekey not in all_gopro_keys:
+            fstring = f"(GH\\d{{2}}{filenum})"
+            r = re.compile(fstring)
+            gplist = sorted(list(filter(r.match, all_gopro_files)))
+            #gplist.insert(0,file)
+            all_gopro_keys.update({filekey:gplist})
 
 
-    print(gopr_dict)
-    return gopr_dict
+    print(all_gopro_keys)
+    return all_gopro_keys
 
 
 def create_datetime(encoded_date):
@@ -146,7 +140,7 @@ def create_ffmpeg_txtfiles(gprkey, gopr_dict, source_path, output_path):
     file '/path/to/file2'
     file '/path/to/file3'
     '''
-    gpr_txt_path = Path(output_path + gprkey[:-4] + '.txt')
+    gpr_txt_path = Path(output_path + gprkey + '.txt')
 
     if gpr_txt_path.exists() is True:
         pass
@@ -156,7 +150,7 @@ def create_ffmpeg_txtfiles(gprkey, gopr_dict, source_path, output_path):
 
         # print("GPR TXT PATH: " + str(gpr_txt_path))
 
-        gprfile_list = sorted(gopr_dict[gprkey])
+        gprfile_list = gopr_dict[gprkey]
 
         for file in gprfile_list:
             file_stmnt = "file " + '\'' + source_path + file + '\'' + "\n"
@@ -173,12 +167,13 @@ def ffmpeg_concat(gprkey, gopr_dict, source_path, output_path):
     '''
     Use FFMPEG subprocess call to merge a set of MP4 files.
     '''
-    os.chdir(output_path)
+    chdir(output_path)
 
-    gpr_txt_path = create_ffmpeg_txtfiles(gprkey, gopr_dict, source_path,
-        output_path)
+    gpr_txt_path = create_ffmpeg_txtfiles(gprkey, gopr_dict, source_path, output_path)
 
-    mediainfo = media.get_mediainfo(source_path, gprkey)
+    firstfile = gopr_dict[gprkey][0]
+
+    mediainfo = media.get_mediainfo(source_path, firstfile)
 
     print("MEDIA INFO: " + str(mediainfo))
 
@@ -189,7 +184,7 @@ def ffmpeg_concat(gprkey, gopr_dict, source_path, output_path):
 
     print("CREATION TIME: " + creation_time)
 
-    mp4_output = str(gprkey[:-4]) + '_' + gprkey_date[:-6] + '.MP4'
+    mp4_output = gprkey + '_' + gprkey_date[:-6] + '.MP4'
 
     ffmpeg_cmd = [
                   'ffmpeg', '-safe', '0', '-f', 'concat',  '-i',
@@ -197,7 +192,7 @@ def ffmpeg_concat(gprkey, gopr_dict, source_path, output_path):
                   mp4_output
                   ]
 
-    output_log = open(output_path + '/' + gprkey[:-4] + '_output.log', 'a')
+    output_log = open(output_path + '/' + gprkey + '_output.log', 'a')
 
     sp = subprocess.Popen(ffmpeg_cmd,
                           shell=False,
@@ -237,7 +232,7 @@ def ffmpeg_downconvert(gprkey, gopr_dict, source_path, output_path):
     print("MP4 SOURCE:" + str(mp4_source))
     print("MP4 OUTPUT:" + str(mp4_output))
 
-    output_log = open(output_path + '/' + gprkey[:-4] + '_output.log', 'a')
+    output_log = open(output_path + '/' + gprkey + '_output.log', 'a')
 
     ffmpeg_cmd = ['ffmpeg', '-i', mp4_source, '-map', '0:0',
           '-map', '0:1', '-c:a', a_format, '-ab', '128k',

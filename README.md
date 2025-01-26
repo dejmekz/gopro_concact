@@ -1,3 +1,7 @@
+#Cloned from (Original)
+[GoPro-Concat-Automation](https://github.com/scuc/GoPro-Concat-Automation)
+
+
 
 # GoPro Concat with Python and FFMPEG
 

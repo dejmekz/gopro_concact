@@ -2,16 +2,16 @@
 
 from pymediainfo import MediaInfo
 
-def get_mediainfo(source_path, gprkey):
+def get_mediainfo(source_path, file_name):
     '''
     Use pymediainfo lib to extract the MP4 file info.
     Pass these values back to the concat and downcovert.
     '''
     media_dict = {}
 
-    gprkey_path = source_path + str(gprkey)
+    full_file_path = source_path + str(file_name)
 
-    media_info = MediaInfo.parse(gprkey_path)
+    media_info = MediaInfo.parse(full_file_path)
 
     for track in media_info.tracks:
         if track.track_type == 'Video':
@@ -52,8 +52,5 @@ def get_mediainfo(source_path, gprkey):
             media_dict.update(a_channel_positions = track.channel_positions)
             media_dict.update(a_sampling_rate = track.sampling_rate)
             media_dict.update(a_compression_mode = track.compression_mode)
-
-
-    # print(media_dict)
 
     return media_dict
