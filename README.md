@@ -1,7 +1,5 @@
-#Cloned from (Original)
+# Cloned from (Original)
 [GoPro-Concat-Automation](https://github.com/scuc/GoPro-Concat-Automation)
-
-
 
 # GoPro Concat with Python and FFMPEG
 
@@ -16,13 +14,17 @@ merge them based on their file number and creation dates.
 
 **Example:**
 
-`GOPR1234.mp4` The first video in a set - always contains "GOPR" at the head of the filename, followed by a file number.)
+<pre>
+`GH011234.mp4` (GH 01 1234 .mp4)  1st chapter of the original video - GP0 + 01 + 1234 + .mp4
+`GH021234.mp4` (GH 02 1234 .mp4)  2nd chapter of the same video - GP0 + 02 + 1234 + .mp4
+`GH0n1234.mp4` (GH 0n 1234 .mp4) n-th chapter of the same video - GP0 + 0n + 1234 + .mp4
+</pre>
 
-`GP011234.mp4` 1st chapter of the original video - subsequent files have "GPO" followed by a chapter number and then a file number. )
-
-`GP021234.mp4` 2nd chapter of the same video - GP0 + 2 + 1234 + .mp4
-
-
+<pre>
+GH<span style="color:#FFA07A">xx</span><span style="color:#32CD32">yyyy</span>.mp4
+<span style="color:#FFA07A">  xx</span> - Order of 4GB video parts
+<span style="color:#32CD32">yyyy</span> - Sequence number of video
+</pre>
 
 ## Prerequisites
 
@@ -66,4 +68,3 @@ After the prerequisites are installed.
 1.   Create a .txt file(s) with the full paths of files. 
 1.   Pass the .txt file to FFMPEG which concats the grouped MP4 into one .MP4. 
 1.   (Optional) Downconvert the merged file to a lower bitrate. 
-
