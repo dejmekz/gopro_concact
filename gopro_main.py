@@ -29,7 +29,7 @@ def ParseInputArguments() -> list:
     parser.add_argument('-s','--source', action='store', help='source input path', default=None, type=str)
     parser.add_argument('-o','--output', action='store', help='ouput path', default=None, type=str)
     parser.add_argument('-a','--all', action='store_true', help='concat all files in one file')
-    parser.add_argument('-v','--version', action='version', help='print version information and exit', version="%(prog)s " + PROG_VERSION)
+    parser.add_argument('-v','--version', action='version', help='print version information and exit', version="%(prog)s " + str(PROG_VERSION))
     parser.add_argument('-d','--debug', action='store_true', help='print alertinguicli information')
 
     parsed_args=parser.parse_args()

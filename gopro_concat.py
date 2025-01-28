@@ -51,7 +51,7 @@ def get_grouped_files(source_path: str, debug: bool = False) -> dict:
         file_number = file_name[4:8]
 
         if file_number not in grouped_gopro_files:
-            fstring = f"[gGhH]\\d{{2}}{file_number}\.[mM][pP]4"
+            fstring = f"[gG][hH]\\d{{2}}{file_number}\.[mM][pP]4"
             r = re.compile(fstring)
             gplist = sorted(list(filter(r.match, all_gopro_files)))
             grouped_gopro_files.update({file_number:gplist})
