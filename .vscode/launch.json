@@ -10,7 +10,8 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${file}",
-            "console": "integratedTerminal"
+            "console": "integratedTerminal",
+            "args": [ "-s", "/mnt/e/JANA_Skoleni/2024_09_01/", "-o", "/mnt/f/Video/", "-a" ]
         }
     ]
 }
